@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../../../firebase/firebase";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -14,19 +16,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem("datathon_auth") === "true";
   });
 
-  const login = (username: string, password: string): boolean => {
-    // Simple authentication - replace with real authentication in production
-    if (username === "admin" && password === "datathon2026") {
+  const login = async (
+    username: string,
+    password: string,
+  ): Promise<boolean> => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password,
+      );
+      // Signed in
+      const user = userCredential.user;
       setIsAuthenticated(true);
       localStorage.setItem("datathon_auth", "true");
-      return true;
+      return true; // Successfully logged in
+    } catch (error: any) {
+      console.error("Authentication error:", error);
+      setIsAuthenticated(false);
+      localStorage.removeItem("datathon_auth");
+      return false; // Failed to log in
     }
-    return false;
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("datathon_auth");
+    signOut(auth)
+      .then(() => {
+        setIsAuthenticated(false);
+        localStorage.removeItem("datathon_auth");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
   };
 
   return (

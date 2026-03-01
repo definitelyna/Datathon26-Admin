@@ -1,14 +1,31 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { db } from "../../../firebase/firebase";
+import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 
 export interface Team {
   id: string;
-  name: string;
-  leader: string;
-  email: string;
-  members: number;
+  teamName: string;
+  contactEmail: string;
+  members: {
+    memberName: string;
+    role: "team_leader" | "team_member";
+    phone: string;
+    email: string;
+  }[];
   institution: string;
-  registeredDate: string;
-  status: "registered" | "proceeded-to-second-round" | "failed-first-round" | "failed-second-round" | "passed-competition";
+  registeredAt: Date;
+  status:
+    | "registered"
+    | "proceeded-to-second-round"
+    | "failed-first-round"
+    | "failed-second-round"
+    | "passed-competition";
 }
 
 export interface FirstRoundSubmission {
@@ -40,119 +57,55 @@ interface DatathonContextType {
   secondRoundSubmissions: SecondRoundSubmission[];
   updateFirstRoundResult: (
     submissionId: string,
-    newResult: FirstRoundSubmission["result"]
+    newResult: FirstRoundSubmission["result"],
   ) => void;
   updateSecondRoundResult: (
     submissionId: string,
-    newResult: SecondRoundSubmission["result"]
+    newResult: SecondRoundSubmission["result"],
   ) => void;
   updateSecondRoundScore: (
     submissionId: string,
-    newScore: number | null
+    newScore: number | null,
   ) => void;
 }
 
-const DatathonContext = createContext<DatathonContextType | undefined>(undefined);
+const DatathonContext = createContext<DatathonContextType | undefined>(
+  undefined,
+);
 
 const initialTeams: Team[] = [
   {
     id: "T001",
-    name: "Data Wizards",
-    leader: "Alice Johnson",
-    email: "alice@datawizards.com",
-    members: 4,
+    teamName: "Data Wizards",
+    contactEmail: "alice@datawizards.com",
+    members: [
+      {
+        memberName: "Alice Johnson",
+        role: "team_leader",
+        phone: "123-456-7890",
+        email: "alice@datawizards.com",
+      },
+      {
+        memberName: "Bob Smith",
+        role: "team_member",
+        phone: "234-567-8901",
+        email: "bob@datawizards.com",
+      },
+      {
+        memberName: "Charlie Brown",
+        role: "team_member",
+        phone: "345-678-9012",
+        email: "charlie@datawizards.com",
+      },
+      {
+        memberName: "Diana Prince",
+        role: "team_member",
+        phone: "456-789-0123",
+        email: "diana@datawizards.com",
+      },
+    ],
     institution: "MIT",
-    registeredDate: "2026-01-15",
-    status: "registered",
-  },
-  {
-    id: "T002",
-    name: "Analytics Masters",
-    leader: "Bob Smith",
-    email: "bob@analyticsm.com",
-    members: 3,
-    institution: "Stanford University",
-    registeredDate: "2026-01-18",
-    status: "registered",
-  },
-  {
-    id: "T003",
-    name: "ML Champions",
-    leader: "Carol Davis",
-    email: "carol@mlchamps.com",
-    members: 5,
-    institution: "UC Berkeley",
-    registeredDate: "2026-01-20",
-    status: "registered",
-  },
-  {
-    id: "T004",
-    name: "Code Breakers",
-    leader: "David Lee",
-    email: "david@codebreak.com",
-    members: 4,
-    institution: "Harvard University",
-    registeredDate: "2026-01-22",
-    status: "registered",
-  },
-  {
-    id: "T005",
-    name: "Neural Networks",
-    leader: "Eva Martinez",
-    email: "eva@neuralnet.com",
-    members: 3,
-    institution: "Carnegie Mellon",
-    registeredDate: "2026-01-25",
-    status: "registered",
-  },
-  {
-    id: "T006",
-    name: "Big Data Brains",
-    leader: "Frank Wilson",
-    email: "frank@bigdatab.com",
-    members: 4,
-    institution: "Georgia Tech",
-    registeredDate: "2026-01-28",
-    status: "registered",
-  },
-  {
-    id: "T007",
-    name: "Python Pioneers",
-    leader: "Grace Chen",
-    email: "grace@pythonp.com",
-    members: 5,
-    institution: "Caltech",
-    registeredDate: "2026-02-01",
-    status: "registered",
-  },
-  {
-    id: "T008",
-    name: "Stat Squad",
-    leader: "Henry Taylor",
-    email: "henry@statsquad.com",
-    members: 3,
-    institution: "Oxford University",
-    registeredDate: "2026-02-03",
-    status: "registered",
-  },
-  {
-    id: "T009",
-    name: "Algorithm Aces",
-    leader: "Iris Brown",
-    email: "iris@algoaces.com",
-    members: 4,
-    institution: "Princeton University",
-    registeredDate: "2026-02-05",
-    status: "registered",
-  },
-  {
-    id: "T010",
-    name: "Data Dynamos",
-    leader: "Jack Robinson",
-    email: "jack@datadynamo.com",
-    members: 5,
-    institution: "Cornell University",
-    registeredDate: "2026-02-08",
+    registeredAt: new Date("2026-01-15"),
     status: "registered",
   },
 ];
@@ -375,101 +328,156 @@ const initialSecondRoundSubmissions: SecondRoundSubmission[] = [
 
 export function DatathonProvider({ children }: { children: ReactNode }) {
   const [teams, setTeams] = useState<Team[]>(initialTeams);
-  const [firstRoundSubmissions, setFirstRoundSubmissions] = useState<FirstRoundSubmission[]>(
-    initialFirstRoundSubmissions
-  );
-  const [secondRoundSubmissions, setSecondRoundSubmissions] = useState<SecondRoundSubmission[]>(
-    initialSecondRoundSubmissions
-  );
+  const [firstRoundSubmissions, setFirstRoundSubmissions] = useState<
+    FirstRoundSubmission[]
+  >(initialFirstRoundSubmissions);
+  const [secondRoundSubmissions, setSecondRoundSubmissions] = useState<
+    SecondRoundSubmission[]
+  >(initialSecondRoundSubmissions);
 
-  const updateTeamStatus = (
+  useEffect(() => {
+    const teamsRef = collection(db, "teams");
+    const teamUnsubscribe = onSnapshot(teamsRef, (snapshot) => {
+      const teamsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        // Ensure `registeredAt` is a JS `Date` to match the `Team` type
+        registeredAt: doc.data().registeredAt?.toDate(),
+      })) as Team[];
+
+      // Prevent overwriting initial mock data if the database is completely empty
+      if (teamsData.length > 0) setTeams(teamsData);
+    });
+
+    return () => teamUnsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const firstRoundSubmissionsRef = collection(db, "firstRoundSubmissions");
+    const firstRoundUnsubscribe = onSnapshot(
+      firstRoundSubmissionsRef,
+      (snapshot) => {
+        const firstRoundData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          submittedDate: doc.data().submittedDate?.toDate().toISOString() || "",
+        })) as FirstRoundSubmission[];
+
+        if (firstRoundData.length > 0) setFirstRoundSubmissions(firstRoundData);
+      },
+    );
+    return () => firstRoundUnsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const secondRoundSubmissionsRef = collection(db, "secondRoundSubmissions");
+    const secondRoundUnsubscribe = onSnapshot(
+      secondRoundSubmissionsRef,
+      (snapshot) => {
+        const secondRoundData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as SecondRoundSubmission[];
+
+        if (secondRoundData.length > 0)
+          setSecondRoundSubmissions(secondRoundData);
+      },
+    );
+    return () => secondRoundUnsubscribe();
+  }, []);
+
+  // Update Firestore instead of local state
+  const updateTeamStatus = async (
     teamId: string,
     firstRoundResult?: FirstRoundSubmission["result"],
-    secondRoundResult?: SecondRoundSubmission["result"]
+    secondRoundResult?: SecondRoundSubmission["result"],
   ) => {
-    setTeams((prevTeams) =>
-      prevTeams.map((team) => {
-        if (team.id !== teamId) return team;
+    let newStatus = "registered";
 
-        // Determine new status based on results
-        if (secondRoundResult === "pass") {
-          return { ...team, status: "passed-competition" as const };
-        } else if (secondRoundResult === "fail") {
-          return { ...team, status: "failed-second-round" as const };
-        } else if (firstRoundResult === "pass") {
-          return { ...team, status: "proceeded-to-second-round" as const };
-        } else if (firstRoundResult === "fail") {
-          return { ...team, status: "failed-first-round" as const };
-        }
+    if (secondRoundResult === "pass") {
+      newStatus = "passed-competition";
+    } else if (secondRoundResult === "fail") {
+      newStatus = "failed-second-round";
+    } else if (firstRoundResult === "pass") {
+      newStatus = "proceeded-to-second-round";
+    } else if (firstRoundResult === "fail") {
+      newStatus = "failed-first-round";
+    }
 
-        return { ...team, status: "registered" as const };
-      })
-    );
+    const teamRef = doc(db, "teams", teamId);
+    try {
+      await updateDoc(teamRef, { status: newStatus });
+    } catch (error) {
+      console.error("Error updating team status in Firestore:", error);
+    }
   };
 
-  const updateFirstRoundResult = (
+  const updateFirstRoundResult = async (
     submissionId: string,
-    newResult: FirstRoundSubmission["result"]
+    newResult: FirstRoundSubmission["result"],
   ) => {
-    setFirstRoundSubmissions((prev) => {
-      const updated = prev.map((sub) =>
-        sub.id === submissionId ? { ...sub, result: newResult } : sub
-      );
+    try {
+      // 1. Update the submission document in Firestore
+      const submissionRef = doc(db, "firstRoundSubmissions", submissionId);
+      await updateDoc(submissionRef, { result: newResult });
 
-      // Update team status
-      const submission = updated.find((s) => s.id === submissionId);
+      // 2. Determine and update the team status in Firestore
+      const submission = firstRoundSubmissions.find(
+        (s) => s.id === submissionId,
+      );
       if (submission) {
         const secondRoundSub = secondRoundSubmissions.find(
-          (s) => s.teamId === submission.teamId
+          (s) => s.teamId === submission.teamId,
         );
-        updateTeamStatus(
+        await updateTeamStatus(
           submission.teamId,
           newResult,
-          secondRoundSub?.result
+          secondRoundSub?.result,
         );
       }
-
-      return updated;
-    });
+    } catch (error) {
+      console.error("Error updating first round result:", error);
+    }
   };
 
-  const updateSecondRoundResult = (
+  const updateSecondRoundResult = async (
     submissionId: string,
-    newResult: SecondRoundSubmission["result"]
+    newResult: SecondRoundSubmission["result"],
   ) => {
-    setSecondRoundSubmissions((prev) => {
-      const updated = prev.map((sub) =>
-        sub.id === submissionId ? { ...sub, result: newResult } : sub
-      );
+    try {
+      // 1. Update the submission document in Firestore
+      const submissionRef = doc(db, "secondRoundSubmissions", submissionId);
+      await updateDoc(submissionRef, { result: newResult });
 
-      // Update team status
-      const submission = updated.find((s) => s.id === submissionId);
+      // 2. Determine and update the team status in Firestore
+      const submission = secondRoundSubmissions.find(
+        (s) => s.id === submissionId,
+      );
       if (submission) {
         const firstRoundSub = firstRoundSubmissions.find(
-          (s) => s.teamId === submission.teamId
+          (s) => s.teamId === submission.teamId,
         );
-        updateTeamStatus(
+        await updateTeamStatus(
           submission.teamId,
           firstRoundSub?.result,
-          newResult
+          newResult,
         );
       }
-
-      return updated;
-    });
+    } catch (error) {
+      console.error("Error updating second round result:", error);
+    }
   };
 
-  const updateSecondRoundScore = (
+  const updateSecondRoundScore = async (
     submissionId: string,
-    newScore: number | null
+    newScore: number | null,
   ) => {
-    setSecondRoundSubmissions((prev) => {
-      const updated = prev.map((sub) =>
-        sub.id === submissionId ? { ...sub, score: newScore } : sub
-      );
-
-      return updated;
-    });
+    try {
+      const submissionRef = doc(db, "secondRoundSubmissions", submissionId);
+      await updateDoc(submissionRef, { score: newScore });
+    } catch (error) {
+      console.error("Error updating second round score:", error);
+    }
   };
 
   return (

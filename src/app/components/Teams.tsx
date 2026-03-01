@@ -21,15 +21,17 @@ export function Teams() {
     const query = searchQuery.toLowerCase();
     return teams.filter(
       (team) =>
-        team.name.toLowerCase().includes(query) ||
-        team.leader.toLowerCase().includes(query) ||
-        team.email.toLowerCase().includes(query) ||
+        team.teamName.toLowerCase().includes(query) ||
+        team.members.some((member) =>
+          member.memberName.toLowerCase().includes(query),
+        ) ||
+        team.contactEmail.toLowerCase().includes(query) ||
         team.institution.toLowerCase().includes(query) ||
-        team.id.toLowerCase().includes(query)
+        team.id.toLowerCase().includes(query),
     );
   }, [searchQuery, teams]);
 
-  const getStatusDisplay = (status: typeof teams[0]["status"]) => {
+  const getStatusDisplay = (status: (typeof teams)[0]["status"]) => {
     switch (status) {
       case "registered":
         return { text: "Registered", color: "text-zinc-400" };
@@ -73,7 +75,10 @@ export function Teams() {
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
           <div className="text-2xl font-semibold text-blue-400">
-            {teams.filter((t) => t.status === "proceeded-to-second-round").length}
+            {
+              teams.filter((t) => t.status === "proceeded-to-second-round")
+                .length
+            }
           </div>
           <div className="text-sm text-zinc-400">In Second Round</div>
         </div>
@@ -85,7 +90,13 @@ export function Teams() {
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
           <div className="text-2xl font-semibold text-red-400">
-            {teams.filter((t) => t.status === "failed-first-round" || t.status === "failed-second-round").length}
+            {
+              teams.filter(
+                (t) =>
+                  t.status === "failed-first-round" ||
+                  t.status === "failed-second-round",
+              ).length
+            }
           </div>
           <div className="text-sm text-zinc-400">Failed</div>
         </div>
@@ -95,7 +106,7 @@ export function Teams() {
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
+            <TableRow className="border-zinc-800 hover:bg-zinc-800/50 align-middle">
               <TableHead className="text-zinc-300">Team ID</TableHead>
               <TableHead className="text-zinc-300">Team Name</TableHead>
               <TableHead className="text-zinc-300">Team Leader</TableHead>
@@ -119,28 +130,52 @@ export function Teams() {
             ) : (
               filteredTeams.map((team) => {
                 const statusDisplay = getStatusDisplay(team.status);
+                console.log(statusDisplay);
+                const leaderName = team.members?.filter(
+                  (m: any) => m.role === "team_leader",
+                )?.[0]?.memberName;
                 return (
                   <TableRow
                     key={team.id}
-                    className="border-zinc-800 hover:bg-zinc-800/30"
+                    className="border-zinc-800 hover:bg-zinc-800/30 align-middle"
                   >
                     <TableCell className="font-mono text-zinc-300">
                       {team.id}
                     </TableCell>
                     <TableCell className="font-medium text-zinc-100">
-                      {team.name}
+                      {team.teamName}
                     </TableCell>
-                    <TableCell className="text-zinc-300">{team.leader}</TableCell>
-                    <TableCell className="text-zinc-400 flex items-center gap-2">
-                      <Mail className="size-4" />
-                      {team.email}
+                    <TableCell className="text-zinc-300">
+                      {leaderName}
                     </TableCell>
-                    <TableCell className="text-zinc-300">{team.institution}</TableCell>
-                    <TableCell className="text-zinc-300">{team.members}</TableCell>
-                    <TableCell className="text-zinc-400 flex items-center gap-2">
-                      <Calendar className="size-4" />
-                      {new Date(team.registeredDate).toLocaleDateString()}
+
+                    <TableCell className="text-zinc-400 align-middle">
+                      <div className="flex items-center gap-2">
+                        <Mail className="size-4" />
+                        {team.contactEmail}
+                      </div>
                     </TableCell>
+
+                    <TableCell className="text-zinc-300">
+                      {team.institution}
+                    </TableCell>
+
+                    <TableCell className="text-zinc-300">
+                      {team.members && team.members.length > 0
+                        ? team.members.map((m) => (
+                            <p key={m.memberName}>{m.memberName}</p>
+                          ))
+                        : "—"}
+                    </TableCell>
+
+                    {/* FIXED: Moved flex classes to an inner div */}
+                    <TableCell className="text-zinc-400 align-middle">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="size-4" />
+                        {team.registeredAt.toLocaleDateString()}
+                      </div>
+                    </TableCell>
+
                     <TableCell>
                       <span className={`font-medium ${statusDisplay.color}`}>
                         {statusDisplay.text}

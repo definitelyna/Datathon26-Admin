@@ -14,23 +14,22 @@ export function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    // Simulate a brief loading state
-    setTimeout(() => {
-      const success = login(username, password);
-      setIsLoading(false);
+    // Wait for the actual Firebase authentication to finish
+    const success = await login(username, password);
 
-      if (success) {
-        navigate("/");
-      } else {
-        setError("Invalid username or password");
-        setPassword("");
-      }
-    }, 500);
+    setIsLoading(false);
+
+    if (success) {
+      navigate("/");
+    } else {
+      setError("Invalid username or password");
+      setPassword("");
+    }
   };
 
   return (
@@ -114,8 +113,12 @@ export function Login() {
               Demo Credentials:
             </p>
             <div className="text-sm font-mono bg-zinc-800 border border-zinc-700 rounded p-3 text-zinc-300">
-              <div>Username: <span className="text-emerald-400">admin</span></div>
-              <div>Password: <span className="text-emerald-400">datathon2026</span></div>
+              <div>
+                Username: <span className="text-emerald-400">admin</span>
+              </div>
+              <div>
+                Password: <span className="text-emerald-400">datathon2026</span>
+              </div>
             </div>
           </div>
         </div>
