@@ -106,21 +106,6 @@ export function Login() {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-zinc-800">
-            <p className="text-sm text-zinc-400 text-center mb-2">
-              Demo Credentials:
-            </p>
-            <div className="text-sm font-mono bg-zinc-800 border border-zinc-700 rounded p-3 text-zinc-300">
-              <div>
-                Username: <span className="text-emerald-400">admin</span>
-              </div>
-              <div>
-                Password: <span className="text-emerald-400">datathon2026</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
