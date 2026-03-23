@@ -107,11 +107,19 @@ export function Teams() {
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-800 hover:bg-zinc-800/50 align-middle">
-              <TableHead className="text-zinc-300">Team ID</TableHead>
-              <TableHead className="text-zinc-300">Team Name</TableHead>
+              <TableHead className="text-zinc-300 w-[100px] min-w-[100px] max-w-[100px] overflow-hidden whitespace-nowrap text-ellipsis">
+                Team ID
+              </TableHead>
+              <TableHead className="text-zinc-300 w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
+                Team Name
+              </TableHead>
               <TableHead className="text-zinc-300">Team Leader</TableHead>
-              <TableHead className="text-zinc-300">Email</TableHead>
-              <TableHead className="text-zinc-300">Institution</TableHead>
+              <TableHead className="text-zinc-300 w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
+                Email
+              </TableHead>
+              <TableHead className="text-zinc-300 w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
+                Institution
+              </TableHead>
               <TableHead className="text-zinc-300">Members</TableHead>
               <TableHead className="text-zinc-300">Registered</TableHead>
               <TableHead className="text-zinc-300">Status</TableHead>
@@ -130,7 +138,6 @@ export function Teams() {
             ) : (
               filteredTeams.map((team) => {
                 const statusDisplay = getStatusDisplay(team.status);
-                console.log(statusDisplay);
                 const leaderName = team.members?.filter(
                   (m: any) => m.role === "team_leader",
                 )?.[0]?.memberName;
@@ -139,31 +146,43 @@ export function Teams() {
                     key={team.id}
                     className="border-zinc-800 hover:bg-zinc-800/30 align-middle"
                   >
-                    <TableCell className="font-mono text-zinc-300">
+                    <TableCell className="font-mono text-zinc-300 w-[100px] min-w-[100px] max-w-[100px] overflow-hidden whitespace-nowrap text-ellipsis">
                       {team.id}
                     </TableCell>
-                    <TableCell className="font-medium text-zinc-100">
+                    <TableCell className="font-medium text-zinc-100 w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
                       {team.teamName}
                     </TableCell>
                     <TableCell className="text-zinc-300">
                       {leaderName}
                     </TableCell>
 
-                    <TableCell className="text-zinc-400 align-middle">
-                      <div className="flex items-center gap-2">
-                        <Mail className="size-4" />
-                        {team.contactEmail}
+                    <TableCell className="text-zinc-400 align-middle w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <span className="break-all">{team.contactEmail}</span>
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-zinc-300 w-[150px] min-w-[150px] max-w-[150px] whitespace-normal break-words">
                       {team.institution}
                     </TableCell>
 
                     <TableCell className="text-zinc-300">
                       {team.members && team.members.length > 0
                         ? team.members.map((m) => (
-                            <p key={m.memberName}>{m.memberName}</p>
+                            <div key={m.memberName} className="mb-2 last:mb-0">
+                              <p className="font-medium text-zinc-200">
+                                {m.memberName}
+                              </p>
+                              <p className="text-xs text-zinc-400">
+                                {m.major || "—"}
+                              </p>
+                              <p className="text-xs text-zinc-400">
+                                DOB: {m.dob || "—"}
+                              </p>
+                              <p className="text-xs text-zinc-400">
+                                {m.university || "—"}
+                              </p>
+                            </div>
                           ))
                         : "—"}
                     </TableCell>

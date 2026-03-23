@@ -17,6 +17,9 @@ export interface Team {
     role: "team_leader" | "team_member";
     phone: string;
     email: string;
+    major?: string;
+    dob?: string;
+    university?: string;
   }[];
   institution: string;
   registeredAt: Date;
