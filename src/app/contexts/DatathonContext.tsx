@@ -35,7 +35,6 @@ export interface FirstRoundSubmission {
   id: string;
   teamId: string;
   teamName: string;
-  pdfLink: string;
   githubLink: string;
   presentationLink: string;
   submittedDate: Date;
@@ -117,7 +116,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1001",
     teamId: "T001",
     teamName: "Data Wizards",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -128,7 +126,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1002",
     teamId: "T002",
     teamName: "Analytics Masters",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -139,7 +136,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1003",
     teamId: "T003",
     teamName: "ML Champions",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-11"),
@@ -150,7 +146,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1004",
     teamId: "T004",
     teamName: "Code Breakers",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -161,7 +156,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1005",
     teamId: "T005",
     teamName: "Neural Networks",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -172,7 +166,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1006",
     teamId: "T006",
     teamName: "Big Data Brains",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -183,7 +176,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1007",
     teamId: "T007",
     teamName: "Python Pioneers",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -194,7 +186,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1008",
     teamId: "T008",
     teamName: "Stat Squad",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-11"),
@@ -205,7 +196,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1009",
     teamId: "T009",
     teamName: "Algorithm Aces",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-10"),
@@ -216,7 +206,6 @@ const initialFirstRoundSubmissions: FirstRoundSubmission[] = [
     id: "S1010",
     teamId: "T010",
     teamName: "Data Dynamos",
-    pdfLink: "https://www.youtube.com/",
     githubLink: "https://www.youtube.com/",
     presentationLink: "https://www.youtube.com/",
     submittedDate: new Date("2026-02-11"),

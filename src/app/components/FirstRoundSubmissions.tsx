@@ -162,7 +162,6 @@ export function FirstRoundSubmissions() {
             <TableHeader>
               <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
                 <TableHead className="text-zinc-300">Team</TableHead>
-                <TableHead className="text-zinc-300">PDF</TableHead>
                 <TableHead className="text-zinc-300">GitHub</TableHead>
                 <TableHead className="text-zinc-300">Presentation</TableHead>
                 <TableHead className="text-zinc-300">Submitted</TableHead>
@@ -173,7 +172,7 @@ export function FirstRoundSubmissions() {
               {firstRoundSubmissions.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={5}
                     className="text-center text-zinc-400 py-8"
                   >
                     No submissions found
@@ -206,9 +205,7 @@ export function FirstRoundSubmissions() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="w-[150px] max-w-[150px] text-zinc-400">
-                      {renderLink(submission.pdfLink, "w-[150px]")}
-                    </TableCell>
+
                     <TableCell className="w-[150px] max-w-[150px] text-zinc-400">
                       {renderLink(submission.githubLink, "w-[150px]")}
                     </TableCell>
