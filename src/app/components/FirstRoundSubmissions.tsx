@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  FileText,
-  Download,
-  Calendar,
-  Clock,
-  Eye,
-  Mail,
-  Award,
-} from "lucide-react";
+import { Award, Mail } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -70,6 +62,25 @@ export function FirstRoundSubmissions() {
     setConfirmationText("");
   };
 
+  const renderLink = (href?: string, className = "") => {
+    if (!href) {
+      return <span className="text-zinc-500">-</span>;
+    }
+
+    const label = href.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return (
+      <a
+        href={href}
+        rel="noopener noreferrer"
+        target="_blank"
+        className={`block truncate text-cyan-300 hover:text-cyan-200 hover:underline ${className}`}
+        title={href}
+      >
+        {label}
+      </a>
+    );
+  };
+
   const getResultBadge = (result: FirstRoundSubmission["result"]) => {
     switch (result) {
       case "pass":
@@ -92,11 +103,6 @@ export function FirstRoundSubmissions() {
         );
     }
   };
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredSubmissions = firstRoundSubmissions.filter((submission) =>
-    submission.teamName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
 
   return (
     <div className="p-8">
@@ -151,122 +157,126 @@ export function FirstRoundSubmissions() {
 
       {/* Submissions Table */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
-              <TableHead className="text-zinc-300">Team</TableHead>
-              <TableHead className="text-zinc-300">File Link</TableHead>
-              <TableHead className="text-zinc-300">Submitted</TableHead>
-              <TableHead className="text-zinc-300">Result</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredSubmissions.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="text-center text-zinc-400 py-8"
-                >
-                  No submissions found
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
+                <TableHead className="text-zinc-300">Team</TableHead>
+                <TableHead className="text-zinc-300">PDF</TableHead>
+                <TableHead className="text-zinc-300">GitHub</TableHead>
+                <TableHead className="text-zinc-300">Presentation</TableHead>
+                <TableHead className="text-zinc-300">Submitted</TableHead>
+                <TableHead className="text-zinc-300">Result</TableHead>
               </TableRow>
-            ) : (
-              filteredSubmissions.map((submission) => (
-                <TableRow
-                  key={submission.id}
-                  className={`border-zinc-800 hover:opacity-90 ${
-                    submission.result === "pass"
-                      ? "bg-emerald-900/20 hover:bg-emerald-900/30"
-                      : submission.result === "fail"
-                        ? "bg-red-900/20 hover:bg-red-900/30"
-                        : "hover:bg-zinc-800/30"
-                  }`}
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {submission.result === "pass" && (
-                        <Award className="size-4 text-emerald-400" />
-                      )}
-                      <div>
-                        <div className="font-medium text-zinc-100">
-                          {submission.teamName}
-                        </div>
-                        <div className="text-sm text-zinc-400 font-mono">
-                          {submission.teamId}
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-zinc-400">
-                    <a
-                      href={submission.fileLink}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      {submission.fileLink}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-zinc-300">
-                      {submission.submittedDate instanceof Date
-                        ? submission.submittedDate.toLocaleDateString("vn-VN")
-                        : "-"}
-                    </div>
-                    <div className="text-sm text-zinc-500 font-mono">
-                      {submission.submittedDate instanceof Date
-                        ? submission.submittedDate.toLocaleTimeString("vn-VN")
-                        : "-"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={submission.result}
-                      onValueChange={(value) =>
-                        handleResultChange(
-                          submission.id,
-                          value as FirstRoundSubmission["result"],
-                        )
-                      }
-                    >
-                      <SelectTrigger className="w-[160px] bg-zinc-800 border-zinc-700 text-zinc-100">
-                        <SelectValue>
-                          {getResultBadge(submission.result)}
-                        </SelectValue>
-                      </SelectTrigger>
-
-                      <SelectContent className="bg-zinc-800 border-zinc-700 w-[300px]">
-                        <SelectItem
-                          value="pending-review"
-                          className="text-zinc-100 flex items-center gap-2"
-                        >
-                          <Badge className="bg-amber-900/50 text-amber-300 border-amber-800">
-                            Pending Review
-                          </Badge>
-                        </SelectItem>
-                        <SelectItem
-                          value="pass"
-                          className="text-zinc-100 flex items-center gap-2"
-                        >
-                          <Badge className="bg-emerald-900/50 text-emerald-300 border-emerald-800">
-                            Pass
-                          </Badge>
-                        </SelectItem>
-                        <SelectItem
-                          value="fail"
-                          className="text-zinc-100 flex items-center gap-2"
-                        >
-                          <Badge className="bg-red-900/50 text-red-300 border-red-800">
-                            Fail
-                          </Badge>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+            </TableHeader>
+            <TableBody>
+              {firstRoundSubmissions.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-zinc-400 py-8"
+                  >
+                    No submissions found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                firstRoundSubmissions.map((submission) => (
+                  <TableRow
+                    key={submission.id}
+                    className={`border-zinc-800 hover:opacity-90 ${
+                      submission.result === "pass"
+                        ? "bg-emerald-900/20 hover:bg-emerald-900/30"
+                        : submission.result === "fail"
+                          ? "bg-red-900/20 hover:bg-red-900/30"
+                          : "hover:bg-zinc-800/30"
+                    }`}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {submission.result === "pass" && (
+                          <Award className="size-4 text-emerald-400" />
+                        )}
+                        <div>
+                          <div className="font-medium text-zinc-100">
+                            {submission.teamName}
+                          </div>
+                          <div className="text-sm text-zinc-400 font-mono">
+                            {submission.teamId}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[150px] max-w-[150px] text-zinc-400">
+                      {renderLink(submission.pdfLink, "w-[150px]")}
+                    </TableCell>
+                    <TableCell className="w-[150px] max-w-[150px] text-zinc-400">
+                      {renderLink(submission.githubLink, "w-[150px]")}
+                    </TableCell>
+                    <TableCell className="w-[150px] max-w-[150px] text-zinc-400">
+                      {renderLink(submission.presentationLink, "w-[150px]")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-zinc-300">
+                        {submission.submittedDate instanceof Date
+                          ? submission.submittedDate.toLocaleDateString("vn-VN")
+                          : "-"}
+                      </div>
+                      <div className="text-sm text-zinc-500 font-mono">
+                        {submission.submittedDate instanceof Date
+                          ? submission.submittedDate.toLocaleTimeString("vn-VN")
+                          : "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={submission.result}
+                        onValueChange={(value) =>
+                          handleResultChange(
+                            submission.id,
+                            value as FirstRoundSubmission["result"],
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-[160px] bg-zinc-800 border-zinc-700 text-zinc-100">
+                          <SelectValue>
+                            {getResultBadge(submission.result)}
+                          </SelectValue>
+                        </SelectTrigger>
+
+                        <SelectContent className="bg-zinc-800 border-zinc-700 w-[300px]">
+                          <SelectItem
+                            value="pending-review"
+                            className="text-zinc-100 flex items-center gap-2"
+                          >
+                            <Badge className="bg-amber-900/50 text-amber-300 border-amber-800">
+                              Pending Review
+                            </Badge>
+                          </SelectItem>
+                          <SelectItem
+                            value="pass"
+                            className="text-zinc-100 flex items-center gap-2"
+                          >
+                            <Badge className="bg-emerald-900/50 text-emerald-300 border-emerald-800">
+                              Pass
+                            </Badge>
+                          </SelectItem>
+                          <SelectItem
+                            value="fail"
+                            className="text-zinc-100 flex items-center gap-2"
+                          >
+                            <Badge className="bg-red-900/50 text-red-300 border-red-800">
+                              Fail
+                            </Badge>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <div className="mt-4 text-sm text-zinc-400">
